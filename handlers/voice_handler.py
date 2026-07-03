@@ -16,7 +16,7 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     user_id = update.effective_user.id
     
-    if not has_credits(user_id) <= 0:
+    if not has_credits(user_id):
 
         await update.message.reply_text(
             "❌ Free Trial Finished!\n\n"
