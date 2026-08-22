@@ -1,11 +1,12 @@
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from config import Bot_token
+from telegram.ext import CallbackQueryHandler
 
 from handlers.start_handler import start
 from handlers.voice_handler import handle_voice
 from handlers.error_handler import error_handler
 from handlers.balance_handler import balance
-from handlers.buy_handler import buy
+from handlers.buy_handler import buy , handle_buy_callback
 from handlers.help_handler import help_command
 def main():
     app = Application.builder().token(Bot_token).build()
@@ -17,6 +18,8 @@ def main():
     app.add_handler(CommandHandler("balance", balance))
 
     app.add_handler(CommandHandler("buy", buy))
+
+    app.add_handler(CallbackQueryHandler(handle_buy_callback, pattern=r"^buy:"))
     
     app.add_handler(CommandHandler("help", help_command))
 
