@@ -1,4 +1,13 @@
-.env
-voice_6265284543.ogg
+.venv/
+venv/
+__pycache__/
+*.pyc
 
-database/credits.db
+.env
+
+database/*.db
+*.db
+
+audio/
+temp/
+logs/

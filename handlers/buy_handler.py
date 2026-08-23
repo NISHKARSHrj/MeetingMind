@@ -7,9 +7,13 @@ from telegram.ext import ContextTypes
 
 from services.payment import create_payment_link
 from services.packages import PACKAGES
+from services.payment_records import create_payment_record
 
 
-async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def buy(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
 
     keyboard = []
 
@@ -61,6 +65,7 @@ async def handle_buy_callback(
 
     try:
 
+        # Create Cashfree Payment Link
         payment = create_payment_link(
             customer_id=user.id,
             customer_name=user.first_name or "MeetingMind User",
@@ -71,11 +76,20 @@ async def handle_buy_callback(
         )
 
         payment_url = payment.get("link_url")
+        link_id = payment.get("link_id")
 
-        if not payment_url:
+        if not payment_url or not link_id:
             raise ValueError(
-                "Cashfree did not return payment URL."
+                "Cashfree did not return link_id or link_url."
             )
+
+        # Save payment as PENDING
+        create_payment_record(
+            link_id=link_id,
+            user_id=user.id,
+            credits=package["credits"],
+            amount=package["price"]
+        )
 
         keyboard = [
             [
@@ -95,7 +109,7 @@ async def handle_buy_callback(
             f"📦 Package: {package['name']}\n"
             f"🎟️ Credits: {package['credits']}\n"
             f"💰 Price: ₹{package['price']}\n\n"
-            f"Click below to continue with payment.",
+            "Click below to complete your payment.",
             reply_markup=reply_markup,
             parse_mode="Markdown"
         )
