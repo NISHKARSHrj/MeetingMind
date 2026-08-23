@@ -126,10 +126,10 @@ temp/
 - ✅ Audio Archiving
 - ✅ Logging
 - ✅ Error Handling
-- 🔄 SQLite Storage
+- ✅ Payment Integration
+- ✅ SQLite Storage
 - 🔄 Google Cloud Deployment
 - 🔄 Docker Support
-- 🔄 Payment Integration
 - 🔄 Meeting History
 
 ---
