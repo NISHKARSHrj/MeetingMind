@@ -63,10 +63,7 @@ def verify_cashfree_signature(
 def cashfree_webhook():
 
     try:
-
-        # --------------------------------
         # Get raw request body
-        # --------------------------------
 
         raw_body = request.get_data()
 
@@ -78,10 +75,9 @@ def cashfree_webhook():
             "x-webhook-signature"
         )
 
-        # --------------------------------
+        
         # Check webhook headers
-        # --------------------------------
-
+        
         if not timestamp or not signature:
 
             logger.warning(
@@ -92,10 +88,9 @@ def cashfree_webhook():
                 "error": "Missing webhook signature"
             }), 400
 
-        # --------------------------------
+        
         # Verify Cashfree signature
-        # --------------------------------
-
+        
         is_valid = verify_cashfree_signature(
             raw_body=raw_body,
             timestamp=timestamp,
@@ -112,20 +107,16 @@ def cashfree_webhook():
                 "error": "Invalid signature"
             }), 401
 
-        # --------------------------------
         # Parse JSON
-        # --------------------------------
-
+        
         data = request.get_json()
 
         logger.info(
             f"Verified Cashfree webhook: {data}"
         )
 
-        # --------------------------------
         # Check event type
-        # --------------------------------
-
+        
         event_type = data.get("type")
 
         if event_type != "PAYMENT_SUCCESS_WEBHOOK":
@@ -138,10 +129,8 @@ def cashfree_webhook():
                 "status": "ignored"
             }), 200
 
-        # --------------------------------
         # Payment information
-        # --------------------------------
-
+        
         payment_data = (
             data
             .get("data", {})
@@ -156,10 +145,8 @@ def cashfree_webhook():
             "payment_amount"
         )
 
-        # --------------------------------
         # Order information
-        # --------------------------------
-
+        
         order_data = (
             data
             .get("data", {})
@@ -175,10 +162,8 @@ def cashfree_webhook():
             "link_id"
         )
 
-        # --------------------------------
         # Check payment status
-        # --------------------------------
-
+        
         if payment_status != "SUCCESS":
 
             logger.info(
@@ -190,10 +175,8 @@ def cashfree_webhook():
                 "status": "payment_not_successful"
             }), 200
 
-        # --------------------------------
         # Check link_id
-        # --------------------------------
-
+        
         if not link_id:
 
             logger.error(
@@ -204,10 +187,8 @@ def cashfree_webhook():
                 "error": "link_id missing"
             }), 400
 
-        # --------------------------------
         # Check payment amount
-        # --------------------------------
-
+        
         if payment_amount is None:
 
             logger.error(
@@ -223,19 +204,15 @@ def cashfree_webhook():
             f"{link_id}"
         )
 
-        # --------------------------------
         # Process payment atomically
-        # --------------------------------
-
+        
         result = process_successful_payment(
             link_id=link_id,
             payment_amount=payment_amount
         )
 
-        # --------------------------------
         # Payment not found
-        # --------------------------------
-
+        
         if result["status"] == "NOT_FOUND":
 
             logger.error(
@@ -247,9 +224,7 @@ def cashfree_webhook():
                 "error": "Payment record not found"
             }), 404
 
-        # --------------------------------
         # User not found
-        # --------------------------------
 
         if result["status"] == "USER_NOT_FOUND":
 
@@ -262,9 +237,7 @@ def cashfree_webhook():
                 "error": "User not found"
             }), 404
 
-        # --------------------------------
         # Amount mismatch
-        # --------------------------------
 
         if result["status"] == "AMOUNT_MISMATCH":
 
@@ -279,10 +252,8 @@ def cashfree_webhook():
                 "error": "Payment amount mismatch"
             }), 400
 
-        # --------------------------------
         # Duplicate payment
-        # --------------------------------
-
+        
         if result["status"] == "ALREADY_PAID":
 
             logger.info(
@@ -294,9 +265,8 @@ def cashfree_webhook():
                 "status": "already_processed"
             }), 200
 
-        # --------------------------------
+        
         # Payment successfully processed
-        # --------------------------------
 
         if result["status"] == "PAID":
 
@@ -311,10 +281,8 @@ def cashfree_webhook():
                 "credits_added": result["credits"]
             }), 200
 
-        # --------------------------------
         # Unknown result
-        # --------------------------------
-
+        
         logger.error(
             f"Unknown payment processing result: "
             f"{result}"
